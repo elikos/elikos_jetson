@@ -4,22 +4,25 @@ Code destiné à être sur la plateforme Jetson d'NVIDIA.
 
 <!-- TOC -->
 
-- [elikos_jetson](#elikos_jetson)
-    - [Setup du Jetson](#setup-du-jetson)
-        - [Flash](#flash)
-            - [Configuration d'installation](#configuration-dinstallation)
-            - [Connection réseau pour l'installation](#connection-réseau-pour-linstallation)
-        - [OS](#os)
-            - [Changement de mot de passe des utilisateurs](#changement-de-mot-de-passe-des-utilisateurs)
-            - [Mettre a jour les sources et paquets préinstallés](#mettre-a-jour-les-sources-et-paquets-préinstallés)
-            - [Overclocking](#overclocking)
-            - [Vidange du OS](#vidange-du-os)
-        - [Installation des dépendances](#installation-des-dépendances)
-            - [ROS](#ros)
-                - [Workspaces](#workspaces)
-            - [`librealsense`](#librealsense)
-            - [`darknet_ros`](#darknet_ros)
-                - [Téléchargement de la configuration de darknet](#téléchargement-de-la-configuration-de-darknet)
+- [Setup du Jetson](#setup-du-jetson)
+    - [Flash](#flash)
+        - [Configuration d'installation](#configuration-dinstallation)
+        - [Connection réseau pour l'installation](#connection-réseau-pour-linstallation)
+    - [OS](#os)
+        - [Changement de mot de passe des utilisateurs](#changement-de-mot-de-passe-des-utilisateurs)
+        - [Mettre a jour les sources et paquets préinstallés](#mettre-a-jour-les-sources-et-paquets-préinstallés)
+        - [Overclocking](#overclocking)
+        - [Vidange du OS](#vidange-du-os)
+    - [Installation des dépendances](#installation-des-dépendances)
+        - [ROS](#ros)
+            - [Workspaces](#workspaces)
+        - [librealsense](#librealsense)
+        - [darknet_ros](#darknet_ros)
+            - [Téléchargement de la configuration de darknet](#téléchargement-de-la-configuration-de-darknet)
+- [Entrainement du réseau de neurone](#entrainement-du-réseau-de-neurone)
+    - [Compilation de darknet](#compilation-de-darknet)
+    - [Création d'un dataset](#création-dun-dataset)
+    - [Entrainement](#entrainement)
 
 <!-- /TOC -->
 
@@ -124,7 +127,7 @@ Le Jetson aura une architecture à double workspace
 - `~/jetson_lib_ws`.
   - Contiendra les pilotes et autres librairies requises au bon fonctionnement des nodes de `~/jetson_ws`.
 
-#### `librealsense`
+#### librealsense
 
 Le paquet `ros-kinetic-librealsense` est **incompatible** avec le Jetson.
 Pour y remédier, nous devons compiler une version spécifique de `librealsense` et de `realsense-camera`.
@@ -168,7 +171,7 @@ sudo rosdep -y install --from-paths src --ignore-src --rosdistro kinetic
 catkin_make
 ```
 
-#### `darknet_ros`
+#### darknet_ros
 
 Pour lier *darknet* à *ROS*, nous utiliserons [darknet_ros](https://github.com/leggedrobotics/darknet_ros).
 
@@ -185,3 +188,53 @@ git reset --hard 0c6531a00ebd1a4375c57eb84077f9c18ab963f7
 ##### Téléchargement de la configuration de darknet
 
 **TODO**
+
+## Entrainement du réseau de neurone
+
+Pour que le réseau de neurone fonctionne, il faut d'abord l'entrainer avec les images à détecter
+
+### Compilation de darknet
+
+Darknet peut être cloné directement à partir du repo GitHub.
+
+```bash
+git clone https://github.com/pjreddie/darknet.git
+cd darknet
+```
+
+Pour une raison mystérieuse, cette dernière version de Darknet peut être incompatible avec certaines cartes grahique. Pour régler ce problème, il est possible d'utiliser la version d'AlexeyAB. Cette version ne doit **pas** être utilisé sur le Jetson.
+
+```bash
+git clone https://github.com/AlexeyAB/darknet
+cd darknet
+```
+
+Avant de compiler darknet, il faut télécharger et installer CUDA 8.
+<https://developer.nvidia.com/cuda-80-ga2-download-archive>
+
+Il faut ensuite modifier le Makefile pour activer Cuda en modifiant le flag `GPU=1` (et `OPENCV=1` si désiré et installé).
+
+```bash
+make
+```
+
+### Création d'un dataset
+
+Afin de créer le dataset, il est possible d'utiliser l'utilitaire d'AlexayAB.
+
+```bash
+git clone https://github.com/AlexeyAB/Yolo_mark
+```
+
+Suivre les étapes décrites sur la page github de Yolo_mark <https://github.com/AlexeyAB/Yolo_mark>.
+
+### Entrainement
+
+Pour entrainer le dataset produit par Yolo_mark, copier le dossier `x64` dans le dossier `darknet`. Ensuite, télécharger les *weights* d'entrainement du site de darknet dans le dossier `darknet/x64/Release`. Finalement, exécuter la commande suivante.
+
+```bash
+./darknet detector train x64/Release/data/obj.data x64/Release/yolo-obj.cfg x64/Release/darknet19_448.conv.23
+```
+
+À chaque 100 itérations, darknet sauvegarde les résultats dans le dossier `darknet/backup`.
+**Note:** Il est possible de diminuer le paramètre `batch` et augmenter le paramètre `subdivisions` dans le fichier yolo-obj.cfg si il n'y a pas assez de mémoire graphique.
