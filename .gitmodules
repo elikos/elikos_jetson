@@ -1,0 +1,6 @@
+[submodule "darknet_ros"]
+	path = darknet_ros
+	url = git@github.com:elikos/darknet_ros.git
+[submodule "camera_signalman"]
+	path = camera_signalman
+	url = git@github.com:elikos/camera_signalman.git
