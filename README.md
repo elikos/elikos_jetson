@@ -168,7 +168,12 @@ cd realsense
 git checkout 1.8.0
 cd ../..
 sudo rosdep -y install --from-paths src --ignore-src --rosdistro kinetic
-catkin_make
+```
+
+Puis build le tout:
+
+```bash
+catkin_make -DCMAKE_BUILD_TYPE=Release
 ```
 
 #### darknet_ros
