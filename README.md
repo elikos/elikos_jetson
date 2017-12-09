@@ -2,6 +2,12 @@
 
 Code destiné à être sur la plateforme Jetson d'NVIDIA.
 
+## *WARNING*
+
+NE PAS TOUCHER AUX PINS GPIO LORSQUE LE JETSON EST EN MARCHE. CELA FAIT COURT-CIRCUITER LE DEV BOARD!
+
+Devine qui a découvert ça _(hint: il a aussi un problème avec les batteries)_...
+
 <!-- TOC -->
 
 - [Setup du Jetson](#setup-du-jetson)
