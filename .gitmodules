@@ -4,3 +4,6 @@
 [submodule "camera_signalman"]
 	path = camera_signalman
 	url = git@github.com:elikos/camera_signalman.git
+[submodule "elikos_msgs"]
+	path = elikos_msgs
+	url = git@github.com:elikos/elikos_msgs.git
