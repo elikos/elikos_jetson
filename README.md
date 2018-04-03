@@ -23,8 +23,9 @@ Devine qui a découvert ça _(hint: il a aussi un problème avec les batteries)_
         - [ROS](#ros)
             - [Workspaces](#workspaces)
         - [librealsense](#librealsense)
-        - [darknet_ros](#darknet_ros)
-            - [Téléchargement de la configuration de darknet](#téléchargement-de-la-configuration-de-darknet)
+    - [Installation des programmes Elikos](#installation-des-programmes-elikos)
+        - [jetson_ws](#jetson_ws)
+        - [.bashrc](#bashrc)
 - [Entrainement du réseau de neurone](#entrainement-du-réseau-de-neurone)
     - [Compilation de darknet](#compilation-de-darknet)
     - [Création d'un dataset](#création-dun-dataset)
@@ -114,6 +115,11 @@ Suivre les instructions sur le site de ROS
 
 > <http://wiki.ros.org/kinetic/Installation/Ubuntu>
 
+Nous voulons aussi utiliser les `Catkin Command Line Tools`:
+```bash
+sudo apt install python-catkin-tools
+```
+
 **À noter: Nous voulons installer la version `ros-kinetic-desktop`**
 
 ##### Workspaces
@@ -136,10 +142,8 @@ Premièrement, installer `librealsense` sur le système:
 
 ```bash
 cd ~
-git clone https://github.com/jetsonhacks/installLibrealsenseTX1.git
-cd installLibrealsenseTX1
-git reset --hard e9f4f92abfdcbab822d152db72f7eeba903f6332
-# À noter que le commit auquel nous resettons est le dernier commit testé
+git clone https://github.com/jetsonhacks/installLibrealsenseTX2.git
+cd installLibrealsenseTX2
 chmod +x installLibrealsense.sh
 ./installLibrealsense.sh
 ```
@@ -173,26 +177,35 @@ Puis build le tout:
 ```bash
 catkin_make -DCMAKE_BUILD_TYPE=Release
 ```
+### Installation des dépendances
 
-#### darknet_ros
-
-Pour lier *darknet* à *ROS*, nous utiliserons [darknet_ros](https://github.com/leggedrobotics/darknet_ros).
-
-**L'installation de `darknet_ros` se fera dans `~/jetson_lib_ws`.**
+#### `jetson_ws`
+Installons maintenant le code qui sera éxécuté sur le Jetson.
 
 ```bash
-cd ~/jetson_lib_ws/src
-git clone https://github.com/leggedrobotics/darknet_ros.git
-cd darknet_ros
-git reset --hard 0c6531a00ebd1a4375c57eb84077f9c18ab963f7
-# À noter que le commit auquel nous resettons est le dernier commit testé
+cd ~
+mkdir -p jetson_ws/src
+cd jetson_ws/src
+git clone --recurse-submodules git@github.com:elikos/elikos_jetson.git
+cd ..
+catkin build
 ```
 
-##### Téléchargement de la configuration de darknet
+#### `.bashrc`
+Pour éviter une prise de panique soudaine lors du démarage du Jetson, nous allons ajouter les _workspaces_ au `.bashrc` pour une inclusion automatique:
 
-**TODO**
+Ajouter les lignes suivantes au `~/.bashrc`:
+```bash
+source ~/jetson_lib_ws/devel/setup.bash
+source ~/jetson_ws/devel/setup.bash
+```
 
-## Entrainement du réseau de neurone
+Puis faire la commande:
+```bash
+source ~/.bashrc
+```
+
+### Entrainement du réseau de neurone
 
 Pour que le réseau de neurone fonctionne, il faut d'abord l'entrainer avec les images à détecter
 
