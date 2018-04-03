@@ -36,9 +36,9 @@ Devine qui a découvert ça _(hint: il a aussi un problème avec les batteries)_
 
 ### Flash
 
-Pour installer le système d'exploitation sur le Jetson, il faut télécharger l'installateur du `Jetpack 3.1`.
+Pour installer le système d'exploitation sur le Jetson, il faut télécharger l'installateur du `Jetpack 3.2`.
 
-<https://developer.nvidia.com/embedded/dlc/jetpack-l4t-3_1>
+<https://developer.nvidia.com/embedded/dlc/jetpack-l4t-3_2>
 
 Ensuite, il faut que suivre les étapes de l'installateur.
 
@@ -72,45 +72,37 @@ sudo apt update
 sudo apt upgrade
 sudo reboot
 ```
+_Il est normal d'avoir certaines erreurs de signature de source apt pour les repos locaux. Simplement les ignorer!_
 
 #### Overclocking
 
-Pour overclocker le Jetson au démarage, créer le fichier `/etc/rc.local` et y écrire:
+Pour overclocker le Jetson au démarage, créer le fichier `/etc/rc.local` et y ajouter:
 
 ```bash
-#!/bin/sh -e
-
 (sleep 60 && /home/nvidia/jetson_clocks.sh) &
-
-exit 0
 ```
 
 Ensuite, éxécuter les commandes suivantes:
 
 ```bash
-sudo chown root /etc/rc.local
-sudo chmod 755 /etc/rc.local
 sudo /etc/init.d/rc.local start
 ```
 
 #### Vidange du OS
 
-Puisque l'espace disque est limité sur le Jetson, il est falcultatif mais pertinent de supprimer certains éléments supperflus.
-
-- Dossiers temporaire d'installation (situés dans le dossier `/home/nvidia/`):
-  - Cuda
-  - OpenCV
-  - cuDNN
-- Les sources des «repo» locaux dans `/etc/apt/sources.list.d/`
-- Les logiciels innutiles:
+Puisque l'espace disque est limité sur le Jetson, il est falcultatif mais pertinent de supprimer certains éléments supperflus comme certains logiciels inutiles:
   - Thunderbird
   - Suite LibreOffice
   - Transmission
-  - **VIM**
+
+```bash
+sudo apt remove chromium-browser thunderbird libreoffice-* transmission-*
+sudo apt autoremove
+```
 
 ### Installation des dépendances
 
-Afin de faire fonctionner le TX1 avec `elikos_jetson`, les programmes suivant doivent être installés
+Afin de faire fonctionner le TX* avec `elikos_jetson`, les programmes suivant doivent être installés
 
 - [ROS](#ROS)
 - [LibRealSense](#LibRealSense)
@@ -122,7 +114,7 @@ Suivre les instructions sur le site de ROS
 
 > <http://wiki.ros.org/kinetic/Installation/Ubuntu>
 
-**À noter: Nous voulons installer la version `ros-kinetic-ros-base`**
+**À noter: Nous voulons installer la version `ros-kinetic-desktop`**
 
 ##### Workspaces
 
